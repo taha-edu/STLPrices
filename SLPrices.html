@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>University Prices</title>
+
+<!-- Fonts: Inter + Noto Sans JP -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #ffffff;
+    --surface: #fafbfd;
+    --card: #ffffff;
+    --outline: #e6e9ee;
+    --text: #0f1720;
+    --muted: #6b7280;
+    --accent: #08a6c0;
+    --accent-2: #057a94;
+    --accent-contrast: #ffffff;
+    --price-bg: #e8f8fb;
+    --danger: #ff6b6b;
+    --radius: 12px;
+    --maxw: 1200px;
+    --batch: 80;
+    --shadow: 0 8px 20px rgba(15,23,42,0.06);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Inter, "Noto Sans JP", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background: var(--bg);
+    color:var(--text);
+    padding:22px;
+    display:flex;
+    justify-content:center;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  .wrap{ width:100%; max-width:var(--maxw); }
+
+  header{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px;
+  }
+
+  .brand{ display:flex; gap:12px; align-items:center; }
+  .neon-logo{
+    width:68px; height:68px; border-radius:10px;
+    background: linear-gradient(180deg,var(--surface),#f1fbfd);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--accent-2); font-weight:900; font-family:"Noto Sans JP",sans-serif;
+    font-size:28px; letter-spacing:1px;
+    box-shadow: 0 6px 18px rgba(8,10,12,0.06);
+    border:1px solid var(--outline);
+    position:relative;
+  }
+
+  h1{ margin:0; font-family:"Noto Sans JP", sans-serif; font-size:20px; color:var(--text); }
+  .subtitle{ margin:0; color:var(--muted); font-size:13px; margin-top:4px; }
+
+  .panel{
+    background: var(--surface);
+    border-radius:14px; padding:14px; border:1px solid var(--outline); box-shadow: var(--shadow);
+  }
+
+  /* controls */
+  .controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+  .searchBox{ flex:1 1 380px; display:flex; gap:8px; align-items:center; }
+  input[type="search"]{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--outline);
+    background: var(--card);
+    color:var(--text); font-size:15px; outline:none; box-shadow: none;
+  }
+  input[type="search"]::placeholder{ color:var(--muted); }
+
+  .select{
+    padding:10px 12px; border-radius:10px; border:1px solid var(--outline);
+    background: var(--card);
+    color:var(--text); font-weight:700; cursor:pointer; min-width:140px;
+  }
+
+  .btn{
+    padding:10px 12px; border-radius:10px; border:1px solid transparent;
+    background: linear-gradient(180deg,var(--accent),var(--accent-2));
+    color:var(--accent-contrast); font-weight:700; cursor:pointer; min-width:100px;
+    box-shadow: 0 6px 18px rgba(8,166,192,0.08);
+  }
+
+  .btn-ghost{ background:transparent; color:var(--muted); border:1px solid var(--outline); }
+
+  .meta-right{ display:flex; gap:8px; align-items:center; }
+
+  /* grid */
+  .gridCards{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap:14px;
+    margin-top:8px;
+  }
+
+  /* card */
+  .prog-card{
+    position:relative; overflow:hidden; border-radius:10px;
+    background: var(--card);
+    border:1px solid var(--outline);
+    padding:12px;
+    min-height:120px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    will-change: transform;
+    border-left: 6px solid transparent;
+    cursor:pointer;
+    box-shadow: 0 6px 18px rgba(15,23,42,0.03);
+  }
+  .prog-card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(15,23,42,0.08);
+    border-left-color: var(--accent);
+  }
+
+  .card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; z-index:2; }
+  .uni-badge{
+    display:inline-flex; align-items:center; gap:8px; padding:6px 10px;
+    border-radius:6px; font-weight:800; font-size:12px;
+    color:var(--text); background: #f6f8fa;
+    border:1px solid var(--outline);
+    font-family:"Noto Sans JP",sans-serif;
+  }
+
+  .price-sign{
+    min-width:110px; text-align:center; padding:10px 12px; border-radius:8px; font-weight:900; font-size:15px;
+    color:var(--text); background: var(--price-bg);
+    border:1px solid var(--outline); box-shadow: none;
+  }
+  .price-sign.tbd{ background: #fff6e6; color:var(--muted); border-style:solid; }
+
+  .title{ font-weight:700; font-size:15px; margin-top:8px; color:var(--text); }
+  .meta{ color:var(--muted); font-size:13px; margin-top:6px; }
+
+  .badges{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .badge{
+    padding:6px 10px; border-radius:6px; font-weight:700; font-size:12px; color:var(--text);
+    background:#f3f6fa;
+    border:1px solid var(--outline);
+  }
+  .badge.cat{ background:#fff7ed; color:#8a5a2e; }
+  .badge.mode{ background:#eef9fb; color:#055a65; }
+
+  .note{
+    margin-top:10px; padding-top:8px; border-top:1px dashed var(--outline); color:var(--muted); font-size:12px;
+    max-height:72px; overflow:auto;
+  }
+
+  .empty{ padding:40px; text-align:center; color:var(--muted); font-style:italic; border:2px dashed var(--outline); background:transparent; }
+
+  .errorBox{ padding:12px; border-radius:8px; background:#fff4f4; border:1px solid #ffd3d3; color:var(--danger); margin-bottom:12px; font-weight:700; }
+
+  .load-more-wrap{ text-align:center; margin-top:12px; }
+  .load-more{ padding:10px 16px; border-radius:10px; background:var(--accent); border:1px solid var(--accent-2); color:var(--accent-contrast); font-weight:800; cursor:pointer; }
+
+  /* modal */
+  .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.45); display:none; align-items:center; justify-content:center; z-index:9999; }
+  .modal{
+    width:min(640px,95%); max-height:86vh; overflow:auto; background:var(--card); border-radius:12px; padding:18px;
+    border:1px solid var(--outline); box-shadow: 0 30px 80px rgba(15,23,42,0.12);
+  }
+  .modal-header{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px;
+  }
+  .modal h3{ margin:0; color:var(--text); font-size:20px; font-weight:800; line-height:1.1; }
+  .fee-chip{
+    background:var(--price-bg); padding:8px 12px; border-radius:10px; font-weight:900; min-width:110px;
+    text-align:center; border:1px solid var(--outline);
+  }
+  .modal .close{ background:transparent; border:0; color:var(--muted); font-size:20px; cursor:pointer; }
+
+  .note-well{
+    margin-top:8px;
+    background:#fbfdff;
+    border:1px solid var(--outline);
+    border-radius:10px;
+    padding:16px;
+    font-size:15px;
+    line-height:1.5;
+    color: #0b1220;
+    white-space:pre-wrap;
+    max-height:56vh;
+    overflow:auto;
+    box-shadow: 0 8px 20px rgba(8,166,192,0.03);
+  }
+
+  @media (max-width:860px){
+    .gridCards{ grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .neon-logo{ width:56px; height:56px; font-size:20px; }
+    .modal{ width:95%; padding:14px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="neon-logo">$</div>
+        <div>
+          <h1>University Fees</h1>
+          <div class="subtitle">Auto-sync with your Google Sheet</div>
+        </div>
+      </div>
+
+      <div class="meta-right" style="gap:12px;align-items:center">
+        <div style="text-align:right">
+          <div style="font-size:12px;color:var(--muted)">Last fetch</div>
+          <div id="lastFetch" style="font-weight:900;color:var(--text)">—</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center">
+          <button id="refreshBtn" class="btn">Refresh</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="panel" role="region" aria-label="University prices panel">
+      <div class="controls">
+        <div class="searchBox">
+          <input id="searchInput" type="search" placeholder="Search program or university (Try 'PhD' or 'Lincoln')" aria-label="Search programs" />
+          <button id="clearSearch" class="btn-ghost btn" aria-label="Clear search">Clear</button>
+        </div>
+
+        <select id="uniFilter" class="select" aria-label="Filter by university"><option value="">All universities</option></select>
+        <select id="typeFilter" class="select" aria-label="Filter by type"><option value="">All types</option></select>
+        <select id="modeFilter" class="select" aria-label="Filter by mode"><option value="">All modes</option></select>
+
+        <!-- price sort -->
+        <select id="priceOrder" class="select" aria-label="Sort by price">
+          <option value="">Sort: None</option>
+          <option value="highest">Price: High → Low</option>
+          <option value="lowest">Price: Low → High</option>
+        </select>
+
+        <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+          <label style="font-size:13px;color:var(--muted)">Auto</label>
+          <input id="autoRefreshChk" type="checkbox" checked aria-label="Auto refresh" />
+          <input id="intervalInput" type="number" min="5" value="30" class="select" style="width:86px" aria-label="Refresh interval (seconds)"/>
+          <span id="loadingChip" style="display:none;color:var(--muted);font-weight:700">SYNC</span>
+        </div>
+      </div>
+
+      <div id="errorArea" style="display:none" class="errorBox" role="alert"></div>
+
+      <div id="listArea" class="gridCards" aria-live="polite">
+        <div class="empty">Loading programs…</div>
+      </div>
+
+      <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+        <button id="loadMoreBtn" class="load-more">Show more programs</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Program Note (minimal: name+fee on top, big readable note below) -->
+  <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" id="modalDialog">
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="close" id="modalClose" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="modal-header">
+        <div>
+          <h3 id="modalTitle">Program title</h3>
+          <div id="modalSubtitle" style="color:var(--muted); margin-top:6px; font-size:13px;"></div>
+        </div>
+        <div class="fee-chip" id="modalFee">N/A</div>
+      </div>
+
+      <div id="modalNote" class="note-well">No details available.</div>
+    </div>
+  </div>
+
+<script>
+/* ---------- CONFIG & DOM ---------- */
+const WEBAPP = 'https://script.google.com/macros/s/AKfycbxsTWMPBtXi4O9LZCDGCUkTNSwcSSFSDtHBTsRvjYb6ELL2MCeZUVfT2-sFF7klII0Efg/exec';
+const MAX_BATCH = Number(getComputedStyle(document.documentElement).getPropertyValue('--batch')) || 80;
+let config = { webAppUrl: WEBAPP, intervalSec: 30, autoRefresh: true };
+
+const listArea = document.getElementById('listArea');
+const lastFetch = document.getElementById('lastFetch');
+const refreshBtn = document.getElementById('refreshBtn');
+const errorArea = document.getElementById('errorArea');
+const loadingChip = document.getElementById('loadingChip');
+
+const searchInput = document.getElementById('searchInput');
+const clearSearchBtn = document.getElementById('clearSearch');
+const uniFilter = document.getElementById('uniFilter');
+const typeFilter = document.getElementById('typeFilter');
+const modeFilter = document.getElementById('modeFilter');
+const priceOrder = document.getElementById('priceOrder');
+const autoRefreshChk = document.getElementById('autoRefreshChk');
+const intervalInput = document.getElementById('intervalInput');
+const loadMoreWrap = document.getElementById('loadMoreWrap');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalClose = document.getElementById('modalClose');
+const modalTitle = document.getElementById('modalTitle');
+const modalSubtitle = document.getElementById('modalSubtitle');
+const modalFee = document.getElementById('modalFee');
+const modalNote = document.getElementById('modalNote');
+
+/* ---------- State ---------- */
+let rawData = [];
+let normalized = [];
+let discoveredKeys = [];
+let mapping = null;
+let nextFetchTimer = null;
+let lastNormalizedJson = '';
+let userInteracting = false;
+let userInteractTimer = null;
+let isFetching = false;
+let renderOffset = 0;
+let filteredCache = null;
+
+/* ---------- Utility helpers ---------- */
+function norm(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+function formatMoney(v){ return (v===null||v===undefined||v==='') ? 'N/A' : 'RM ' + Number(v).toLocaleString(); }
+function formatFee(f){ if (f===null || f===undefined || f==='') return 'N/A'; if (isNaN(f)) return String(f); return formatMoney(f); }
+function parseNumberCell(v){ if (v===null||v===undefined||v==='') return null; const s = String(v).replace(/[^\d\.\-]/g,''); if (s==='') return null; const n=Number(s); return isNaN(n)?null:n; }
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ---------- Candidates (note replaces misc columns) ---------- */
+const CANDIDATES = {
+  university: ['university','school','institution','college'],
+  category: ['category','type','level'],
+  name: ['name','program','title','course'],
+  mode: ['mode','study mode','delivery'],
+  duration: ['duration','months','length','period'],
+  fee: ['fee','fees','price','tuition','amount','cost'],
+  note: ['note','notes','remark','remarks','description','details','details_note','info']
+};
+
+/* ---------- Auto-map / normalization ---------- */
+function autoMap(keys){
+  const mapped = {}; const used = new Set();
+  const normCandidates = {};
+  for (const c in CANDIDATES) normCandidates[c] = CANDIDATES[c].map(x => norm(x));
+  for (const can of Object.keys(CANDIDATES)){
+    mapped[can] = null;
+    for (const k of keys){
+      if (used.has(k)) continue;
+      if (normCandidates[can].includes(norm(k))){ mapped[can]=k; used.add(k); break; }
+    }
+  }
+  for (const can of Object.keys(CANDIDATES)){
+    if (mapped[can]) continue;
+    for (const k of keys){
+      if (used.has(k)) continue;
+      const parts = String(k).split(/[\/\|,]/).map(p=>norm(p));
+      if (parts.some(p=>normCandidates[can].includes(p))){ mapped[can]=k; used.add(k); break; }
+    }
+  }
+  for (const can of Object.keys(CANDIDATES)){
+    if (mapped[can]) continue;
+    for (const k of keys){
+      if (used.has(k)) continue;
+      const nk = norm(k);
+      if (normCandidates[can].some(cand => nk.includes(cand))){ mapped[can]=k; used.add(k); break; }
+    }
+  }
+  if (!mapped.name){
+    const first = keys.find(k=>k && String(k).trim());
+    if (first) mapped.name = first;
+  }
+  return mapped;
+}
+
+function buildNormalized(arr, map){
+  if (!arr || !Array.isArray(arr)) return [];
+  return arr.map(obj=>{
+    if (!obj || typeof obj !== 'object') return null;
+    const raw = k => {
+      if (!k) return '';
+      if (k in obj) return obj[k];
+      const fk = Object.keys(obj).find(x=>String(x).toLowerCase()===String(k).toLowerCase());
+      return fk ? obj[fk] : '';
+    };
+    const name = String(raw(map.name) || '').trim();
+    if (!name) return null;
+    const university = String(raw(map.university) || '').trim() || 'Unknown';
+    const category = String(raw(map.category) || '').trim() || '—';
+    const mode = String(raw(map.mode) || '').trim() || '—';
+    const duration = parseNumberCell(raw(map.duration));
+    const fee = parseNumberCell(raw(map.fee));
+    const note = String(raw(map.note) || '').trim() || '';
+    return { university, category, name, mode, duration, fee, note };
+  }).filter(Boolean);
+}
+
+/* ---------- Loading / fetch scheduling ---------- */
+function setLoading(on){
+  isFetching = !!on;
+  loadingChip.style.display = on ? 'inline-block' : 'none';
+}
+
+async function doFetch({force=false} = {}){ 
+  if (userInteracting && !force){
+    scheduleNextFetch(3000);
+    return;
+  }
+  setLoading(true);
+  showError(null);
+  try {
+    const resp = await fetch(config.webAppUrl, { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
+    const json = await resp.json();
+
+    // find array-of-objects inside response
+    let arr = null;
+    if (Array.isArray(json)) arr = json;
+    else if (json && Array.isArray(json.rows)) arr = json.rows;
+    else if (json && Array.isArray(json.data)) arr = json.data;
+    else { const candidate = Object.values(json).find(v => Array.isArray(v)); if (candidate) arr = candidate; }
+    if (!arr) throw new Error('Web app did not return an array of rows. Check script output.');
+    if (!arr.every(it => it && typeof it === 'object' && !Array.isArray(it))) throw new Error('Rows are not objects. Apps Script must return array of objects.');
+
+    rawData = arr;
+    discoveredKeys = Object.keys(arr[0] || {});
+    mapping = autoMap(discoveredKeys);
+
+    const work = () => {
+      const newNormalized = buildNormalized(rawData, mapping);
+      if (!newNormalized.length) { showError('Parsed 0 valid rows — ensure rows have a program name.'); setLoading(false); scheduleNextFetch(); return; }
+      const newJson = JSON.stringify(newNormalized);
+      const keysJson = JSON.stringify(discoveredKeys);
+      const changed = (newJson !== lastNormalizedJson) || (keysJson !== window._lastDiscoveredKeysJson);
+      window._lastDiscoveredKeysJson = keysJson;
+      lastFetch.textContent = new Date().toLocaleString();
+
+      if (!changed && !force){
+        normalized = newNormalized;
+        setLoading(false);
+        scheduleNextFetch();
+        return;
+      }
+
+      normalized = newNormalized;
+      lastNormalizedJson = newJson;
+      renderOffset = 0;
+      fillFilters();
+      filteredCache = null;
+      renderProgressive();
+      setLoading(false);
+      scheduleNextFetch();
+    };
+
+    if (force && typeof requestIdleCallback === 'function'){
+      requestIdleCallback(work, {timeout:500});
+    } else if (typeof requestIdleCallback === 'function'){
+      requestIdleCallback(work);
+    } else {
+      setTimeout(work, 0);
+    }
+
+  } catch (err){
+    console.error(err);
+    showError(String(err.message || err));
+    setLoading(false);
+    scheduleNextFetch();
+  }
+}
+
+function scheduleNextFetch(delayMs){
+  if (typeof delayMs === 'undefined') delayMs = config.intervalSec * 1000;
+  if (nextFetchTimer){ clearTimeout(nextFetchTimer); nextFetchTimer = null; }
+  nextFetchTimer = setTimeout(()=> doFetch({force:false}), delayMs);
+}
+
+function manualRefresh(){ if (nextFetchTimer){ clearTimeout(nextFetchTimer); nextFetchTimer = null; } doFetch({force:true}); }
+function startPolling(){ if (nextFetchTimer) clearTimeout(nextFetchTimer); scheduleNextFetch(0); }
+
+/* ---------- Rendering ---------- */
+function getFiltered(){
+  const q = (searchInput.value || '').trim().toLowerCase();
+  const uni = uniFilter.value;
+  const type = typeFilter.value;
+  const mode = modeFilter.value;
+  const order = (priceOrder && priceOrder.value) || '';
+
+  let out = normalized.filter(r => {
+    if (uni && r.university !== uni) return false;
+    if (type && r.category !== type) return false;
+    if (mode && r.mode !== mode) return false;
+    if (q){
+      const hay = `${r.name} ${r.university} ${r.category} ${r.mode} ${r.note}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (order === 'highest' || order === 'lowest'){
+    out = out.slice().sort((a,b) => {
+      const af = (typeof a.fee === 'number') ? a.fee : null;
+      const bf = (typeof b.fee === 'number') ? b.fee : null;
+      if (af === null && bf === null) return 0;
+      if (af === null) return 1;
+      if (bf === null) return -1;
+      return (order === 'highest') ? (bf - af) : (af - bf);
+    });
+  }
+
+  filteredCache = out;
+  return out;
+}
+
+function renderCard(p){
+  const article = document.createElement('article');
+  article.className = 'prog-card';
+
+  const top = document.createElement('div'); top.className = 'card-top';
+  const uni = document.createElement('div'); uni.className = 'uni-badge'; uni.textContent = p.university;
+  const fee = document.createElement('div'); fee.className = (p.fee===null ? 'price-sign tbd' : 'price-sign'); fee.textContent = (p.fee===null||p.fee===undefined)?'N/A':formatFee(p.fee);
+  top.appendChild(uni); top.appendChild(fee);
+
+  const title = document.createElement('div'); title.className = 'title'; title.textContent = p.name;
+  const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = (p.duration===null||p.duration===undefined) ? 'Duration: N/A' : 'Duration: ' + p.duration + ' months';
+
+  const badges = document.createElement('div'); badges.className = 'badges';
+  const cat = document.createElement('span'); cat.className = 'badge cat'; cat.textContent = p.category;
+  const mode = document.createElement('span'); mode.className = 'badge mode'; mode.textContent = p.mode;
+  badges.appendChild(cat); badges.appendChild(mode);
+
+  article.appendChild(top);
+  article.appendChild(title);
+  article.appendChild(meta);
+  article.appendChild(badges);
+
+  if (p.note){
+    const note = document.createElement('div'); note.className = 'note'; note.textContent = p.note;
+    article.appendChild(note);
+  }
+
+  // click to open modal showing Program note (minimal)
+  article.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    openNoteModal(p);
+  });
+
+  return article;
+}
+
+function renderProgressive(){
+  const all = getFiltered();
+  if (!all.length){
+    listArea.innerHTML = '<div class="empty">No programs match your search or filters.</div>';
+    loadMoreWrap.style.display = 'none';
+    return;
+  }
+
+  const batchSize = MAX_BATCH;
+  const start = renderOffset;
+  const end = Math.min(start + batchSize, all.length);
+  const slice = all.slice(start, end);
+
+  if (start === 0) listArea.innerHTML = '';
+
+  const frag = document.createDocumentFragment();
+  for (const p of slice){
+    frag.appendChild(renderCard(p));
+  }
+  listArea.appendChild(frag);
+
+  renderOffset = end;
+  loadMoreWrap.style.display = (renderOffset < all.length) ? 'block' : 'none';
+}
+
+function loadMore(){
+  setTimeout(()=> { renderProgressive(); }, 40);
+}
+
+/* ---------- Filters population ---------- */
+function fillFilters(){
+  uniFilter.innerHTML = '<option value="">All universities</option>';
+  typeFilter.innerHTML = '<option value="">All types</option>';
+  modeFilter.innerHTML = '<option value="">All modes</option>';
+
+  const unis = Array.from(new Set(normalized.map(x=>x.university))).sort();
+  const types = Array.from(new Set(normalized.map(x=>x.category))).sort();
+  const modes = Array.from(new Set(normalized.map(x=>x.mode))).sort();
+
+  const doc = document.createDocumentFragment();
+  unis.forEach(u => { const o=document.createElement('option'); o.value=u; o.textContent=u; doc.appendChild(o); });
+  uniFilter.appendChild(doc);
+
+  const doc2 = document.createDocumentFragment();
+  types.forEach(t => { const o=document.createElement('option'); o.value=t; o.textContent=t; doc2.appendChild(o); });
+  typeFilter.appendChild(doc2);
+
+  const doc3 = document.createDocumentFragment();
+  modes.forEach(m => { const o=document.createElement('option'); o.value=m; o.textContent=m; doc3.appendChild(o); });
+  modeFilter.appendChild(doc3);
+}
+
+/* ---------- Modal utilities (minimal: show name + fee on top, note below) ---------- */
+function openNoteModal(p){
+  modalTitle.textContent = p.name || '';
+  modalSubtitle.textContent = p.university ? p.university : '';
+  modalFee.textContent = (p.fee===null||p.fee===undefined) ? 'N/A' : formatFee(p.fee);
+
+  // show note in readable well; escape HTML then keep line breaks
+  if (p.note && String(p.note).trim()){
+    modalNote.innerHTML = escapeHtml(String(p.note)).replace(/\n/g,'<br>');
+  } else {
+    modalNote.textContent = 'No additional notes.';
+  }
+
+  modalBackdrop.style.display = 'flex';
+  modalBackdrop.setAttribute('aria-hidden','false');
+  modalClose.focus();
+}
+
+function closeModal(){
+  modalBackdrop.style.display = 'none';
+  modalBackdrop.setAttribute('aria-hidden','true');
+}
+
+/* ---------- Misc helpers ---------- */
+function avgFee(list){ const nums = list.map(x=>x.fee).filter(v=>typeof v==='number' && !isNaN(v)); if (!nums.length) return null; return Math.round(nums.reduce((a,b)=>a+b,0)/nums.length); }
+function showError(msg){ if (!msg){ errorArea.style.display='none'; errorArea.textContent=''; return; } errorArea.style.display='block'; errorArea.textContent = msg; }
+
+/* ---------- Interaction suppression ---------- */
+function markUserInteracting(){
+  userInteracting = true;
+  if (userInteractTimer) clearTimeout(userInteractTimer);
+  userInteractTimer = setTimeout(()=> { userInteracting = false; }, 3000);
+}
+
+/* ---------- Event wiring ---------- */
+refreshBtn.addEventListener('click', ()=> { showError(null); manualRefresh(); });
+clearSearchBtn.addEventListener('click', ()=> { searchInput.value=''; onFilterChange(); });
+
+searchInput.addEventListener('input', debounce(() => { onFilterChange(); }, 200));
+
+uniFilter.addEventListener('change', ()=> onFilterChange());
+typeFilter.addEventListener('change', ()=> onFilterChange());
+modeFilter.addEventListener('change', ()=> onFilterChange());
+priceOrder.addEventListener('change', ()=> onFilterChange());
+loadMoreBtn.addEventListener('click', () => loadMore());
+
+autoRefreshChk.addEventListener('change', ()=> { config.autoRefresh = !!autoRefreshChk.checked; if (config.autoRefresh) scheduleNextFetch(); });
+intervalInput.addEventListener('change', ()=> { let n = Number(intervalInput.value)||30; if (n<5) n=5; intervalInput.value = n; config.intervalSec = n; scheduleNextFetch(); });
+
+['wheel','touchstart','pointerdown','pointermove'].forEach(ev => {
+  listArea.addEventListener(ev, ()=> markUserInteracting(), { passive:true });
+});
+window.addEventListener('scroll', ()=> markUserInteracting(), { passive:true });
+
+function onFilterChange(){
+  filteredCache = null;
+  renderOffset = 0;
+  if (typeof requestIdleCallback === 'function'){
+    requestIdleCallback(() => { renderProgressive(); });
+  } else {
+    setTimeout(()=> renderProgressive(), 0);
+  }
+}
+
+/* modal wiring */
+modalClose.addEventListener('click', closeModal);
+modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+/* debounce helper */
+function debounce(fn, wait){
+  let t = null;
+  return function(...args){
+    clearTimeout(t);
+    t = setTimeout(()=> fn.apply(this, args), wait);
+  };
+}
+
+/* ---------- Boot ---------- */
+(function boot(){
+  config.webAppUrl = WEBAPP;
+  config.intervalSec = Number(intervalInput.value) || 30;
+  config.autoRefresh = !!autoRefreshChk.checked;
+
+  // initial fetch
+  doFetch({force:true});
+})();
+</script>
+</body>
+</html>
