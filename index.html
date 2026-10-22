@@ -90,7 +90,7 @@ input[type="search"]::-webkit-search-cancel-button{display:none}
 .load-more:hover{background:var(--blue-2)}
 .load-more:active{transform:scale(.97)}
 
-/* modal sheet */
+/* sheet */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.36);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);display:none;align-items:center;justify-content:center;z-index:9999}
 .modal{width:min(680px,94%);max-height:90vh;overflow:auto;background:#fff;border-radius:28px;padding:18px 36px 38px;box-shadow:0 40px 100px -20px rgba(0,0,0,.4);animation:sheet .4s cubic-bezier(.2,.8,.2,1)}
 @keyframes sheet{from{opacity:0;transform:translateY(24px) scale(.97)}}
@@ -180,7 +180,7 @@ input[type="search"]::-webkit-search-cancel-button{display:none}
   </div>
 
 <script>
-/* ---------- CONFIG & DOM ---------- */
+/* CONFIG and DOM */
 const WEBAPP = 'https://script.google.com/macros/s/AKfycbxsTWMPBtXi4O9LZCDGCUkTNSwcSSFSDtHBTsRvjYb6ELL2MCeZUVfT2-sFF7klII0Efg/exec';
 const MAX_BATCH = Number(getComputedStyle(document.documentElement).getPropertyValue('--batch')) || 80;
 let config = { webAppUrl: WEBAPP, intervalSec: 30, autoRefresh: true };
@@ -209,7 +209,7 @@ const modalSubtitle = document.getElementById('modalSubtitle');
 const modalFee = document.getElementById('modalFee');
 const modalNote = document.getElementById('modalNote');
 
-/* ---------- State ---------- */
+/* State */
 let rawData = [];
 let normalized = [];
 let discoveredKeys = [];
@@ -222,14 +222,14 @@ let isFetching = false;
 let renderOffset = 0;
 let filteredCache = null;
 
-/* ---------- Utility helpers ---------- */
+/* Utility helpers */
 function norm(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
 function formatMoney(v){ return (v===null||v===undefined||v==='') ? 'N/A' : 'RM ' + Number(v).toLocaleString(); }
 function formatFee(f){ if (f===null || f===undefined || f==='') return 'N/A'; if (isNaN(f)) return String(f); return formatMoney(f); }
 function parseNumberCell(v){ if (v===null||v===undefined||v==='') return null; const s = String(v).replace(/[^\d\.\-]/g,''); if (s==='') return null; const n=Number(s); return isNaN(n)?null:n; }
 function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-/* ---------- Candidates (note replaces misc columns) ---------- */
+/* Candidates (note replaces misc columns) */
 const CANDIDATES = {
   university: ['university','school','institution','college'],
   category: ['category','type','level'],
@@ -240,7 +240,7 @@ const CANDIDATES = {
   note: ['note','notes','remark','remarks','description','details','details_note','info']
 };
 
-/* ---------- Auto-map / normalization ---------- */
+/* Auto-map / normalization */
 function autoMap(keys){
   const mapped = {}; const used = new Set();
   const normCandidates = {};
@@ -297,7 +297,7 @@ function buildNormalized(arr, map){
   }).filter(Boolean);
 }
 
-/* ---------- Loading / fetch scheduling ---------- */
+/* Loading and fetch scheduling */
 function setLoading(on){
   isFetching = !!on;
   loadingChip.style.display = on ? 'inline-block' : 'none';
@@ -315,7 +315,7 @@ async function doFetch({force=false} = {}){
     if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
     const json = await resp.json();
 
-    // find array-of-objects inside response
+    // find array of objects inside response
     let arr = null;
     if (Array.isArray(json)) arr = json;
     else if (json && Array.isArray(json.rows)) arr = json.rows;
@@ -379,7 +379,7 @@ function scheduleNextFetch(delayMs){
 function manualRefresh(){ if (nextFetchTimer){ clearTimeout(nextFetchTimer); nextFetchTimer = null; } doFetch({force:true}); }
 function startPolling(){ if (nextFetchTimer) clearTimeout(nextFetchTimer); scheduleNextFetch(0); }
 
-/* ---------- Rendering ---------- */
+/* Rendering */
 function getFiltered(){
   const q = (searchInput.value || '').trim().toLowerCase();
   const uni = uniFilter.value;
@@ -477,7 +477,7 @@ function loadMore(){
   setTimeout(()=> { renderProgressive(); }, 40);
 }
 
-/* ---------- Filters population ---------- */
+/* Filters population */
 function fillFilters(){
   uniFilter.innerHTML = '<option value="">All universities</option>';
   typeFilter.innerHTML = '<option value="">All types</option>';
@@ -500,7 +500,7 @@ function fillFilters(){
   modeFilter.appendChild(doc3);
 }
 
-/* ---------- Modal utilities ---------- */
+/* Modal utilities */
 function openNoteModal(p){
   modalTitle.textContent = p.name || '';
   modalSubtitle.textContent = p.university ? p.university : '';
@@ -522,18 +522,18 @@ function closeModal(){
   modalBackdrop.setAttribute('aria-hidden','true');
 }
 
-/* ---------- Misc helpers ---------- */
+/* Misc helpers */
 function avgFee(list){ const nums = list.map(x=>x.fee).filter(v=>typeof v==='number' && !isNaN(v)); if (!nums.length) return null; return Math.round(nums.reduce((a,b)=>a+b,0)/nums.length); }
 function showError(msg){ if (!msg){ errorArea.style.display='none'; errorArea.textContent=''; return; } errorArea.style.display='block'; errorArea.textContent = msg; }
 
-/* ---------- Interaction suppression ---------- */
+/* Interaction suppressions */
 function markUserInteracting(){
   userInteracting = true;
   if (userInteractTimer) clearTimeout(userInteractTimer);
   userInteractTimer = setTimeout(()=> { userInteracting = false; }, 3000);
 }
 
-/* ---------- Event wiring ---------- */
+/* Event wiring */
 refreshBtn.addEventListener('click', ()=> { showError(null); manualRefresh(); });
 clearSearchBtn.addEventListener('click', ()=> { searchInput.value=''; onFilterChange(); });
 
@@ -577,7 +577,7 @@ function debounce(fn, wait){
   };
 }
 
-/* ---------- Boot ---------- */
+/* Boot */
 (function boot(){
   config.webAppUrl = WEBAPP;
   config.intervalSec = Number(intervalInput.value) || 30;
